@@ -12,7 +12,7 @@ const links = [
   { label: "Documentation", href: "/documentation" },
 ];
 
-const GITHUB_URL = "https://github.com/horacioskrp/dalibi";
+const GITHUB_URL = "https://github.com/wearedalibi/dalibi";
 
 /** En-tête unique du site (logo + navigation), réutilisable sur toutes les pages. */
 export function SiteHeader() {

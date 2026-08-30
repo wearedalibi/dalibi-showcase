@@ -38,7 +38,7 @@ export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
 
 /** Réseaux / profils officiels (schema.org sameAs). */
-export const SITE_SAMEAS = ["https://github.com/horacioskrp/dalibi"];
+export const SITE_SAMEAS = ["https://github.com/wearedalibi/dalibi"];
 
 /** Éditeur / mainteneur. */
 export const PUBLISHER_NAME = "Karfi";

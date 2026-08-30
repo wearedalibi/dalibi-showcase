@@ -24,7 +24,7 @@ export function ContributionSection() {
                   Demander une démo <ArrowRight className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://github.com/horacioskrp/dalibi"
+                  href="https://github.com/wearedalibi/dalibi"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-secondary"

@@ -44,7 +44,7 @@ export function OpenSourceSection() {
             </div>
 
             <a
-              href="https://github.com/horacioskrp/dalibi"
+              href="https://github.com/wearedalibi/dalibi"
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary gs-fade-up"

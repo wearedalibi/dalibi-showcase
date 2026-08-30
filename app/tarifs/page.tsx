@@ -111,7 +111,7 @@ export default function PricingPage() {
                 <span className="text-4xl font-bold leading-none">Gratuit</span>
               </div>
               <a
-                href="https://github.com/horacioskrp/dalibi"
+                href="https://github.com/wearedalibi/dalibi"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-secondary w-full mb-6"

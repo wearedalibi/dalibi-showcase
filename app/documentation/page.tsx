@@ -17,7 +17,7 @@ export const metadata = pageMeta({
   path: "/documentation",
 });
 
-const GITHUB_URL = "https://github.com/horacioskrp/dalibi";
+const GITHUB_URL = "https://github.com/wearedalibi/dalibi";
 
 type Guide = { icon: LucideIcon; title: string; description: string };
 
@@ -29,7 +29,7 @@ const guides: Guide[] = [
 ];
 
 const steps = [
-  "git clone https://github.com/horacioskrp/dalibi.git",
+  "git clone https://github.com/wearedalibi/dalibi.git",
   "cd dalibi",
   "composer install && npm install",
   "cp .env.example .env && php artisan key:generate",

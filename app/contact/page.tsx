@@ -59,7 +59,7 @@ export default function ContactPage() {
               </div>
 
               <a
-                href="https://github.com/horacioskrp/dalibi"
+                href="https://github.com/wearedalibi/dalibi"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
