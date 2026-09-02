@@ -1,7 +1,9 @@
 import { pageMeta } from "@/lib/seo";
+import type { LucideIcon } from "lucide-react";
 import {
-  BookOpen, Boxes, Database, GraduationCap, Layers3, Rocket,
-  Server, ShieldCheck, Terminal, Wallet, Workflow,
+  Archive, BarChart3, BookOpen, Boxes, Briefcase, Calendar, Database, FileText,
+  GraduationCap, LayoutDashboard, Layers3, NotebookPen, Rocket, Server, Settings,
+  Shield, ShieldCheck, Smartphone, Terminal, TrendingUp, UserCheck, Users, Wallet, Workflow,
 } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 import { LandingFooter } from "@/components/landing/landing-footer";
@@ -28,11 +30,149 @@ const nav: DocNavItem[] = [
   { id: "configuration", label: "Configuration (.env)" },
   { id: "demarrage", label: "Seeding & démarrage" },
   { id: "architecture", label: "Comprendre l'app" },
+  { id: "modules", label: "Les modules" },
   { id: "roles", label: "Rôles & permissions" },
   { id: "stockage", label: "Stockage & fichiers" },
   { id: "sauvegardes", label: "Sauvegardes" },
   { id: "api", label: "API du portail" },
   { id: "contribuer", label: "Contribuer" },
+];
+
+type ModuleDoc = { icon: LucideIcon; title: string; purpose: string; features: string[] };
+
+const modules: ModuleDoc[] = [
+  {
+    icon: LayoutDashboard,
+    title: "Tableau de bord",
+    purpose: "Synthèse d'activité, composée par permission — chaque profil ne voit que ses sections.",
+    features: [
+      "Finances : facturé / encaissé / reste, évolution mensuelle, caisses, répartition par moyen de paiement",
+      "Inscriptions & effectifs : totaux, parité, inscriptions récentes, répartition par classe",
+      "Vie scolaire : présences du jour, permissions en attente, prochains examens",
+      "Vue enseignant : emploi du temps du jour, notes à saisir, accès rapide « Faire l'appel »",
+    ],
+  },
+  {
+    icon: Users,
+    title: "Élèves & inscriptions",
+    purpose: "Le cœur de la scolarité : dossiers des élèves et leur parcours d'une année à l'autre.",
+    features: [
+      "Dossiers élèves complets (état civil, parents, contacts, photo)",
+      "Inscriptions à l'année académique active et affectation aux classes",
+      "Effectifs & listes de classe, passage de classe (promotion) en fin d'année",
+      "Bourses d'étudiants et statistiques élèves (parité, répartition)",
+      "Emploi du temps hebdomadaire par classe",
+    ],
+  },
+  {
+    icon: UserCheck,
+    title: "Présences",
+    purpose: "Suivi de l'assiduité au quotidien.",
+    features: [
+      "Saisie de l'appel par classe et par séance",
+      "Statistiques d'assiduité (taux de présence, absences répétées)",
+      "Demandes et justificatifs de permission d'absence",
+    ],
+  },
+  {
+    icon: FileText,
+    title: "Examens",
+    purpose: "Organisation des évaluations, des devoirs de classe aux examens officiels.",
+    features: [
+      "Modèles d'évaluation réutilisables",
+      "Évaluations par classe et planning des examens",
+      "Examens officiels (CEPD, BEPC, BAC) et suivi des résultats",
+    ],
+  },
+  {
+    icon: NotebookPen,
+    title: "Notes & bulletins",
+    purpose: "De la saisie des notes au bulletin PDF fidèle.",
+    features: [
+      "Saisie des notes par matière et par évaluation",
+      "Calcul des moyennes paramétrable (par type de classe, trimestre ou semestre)",
+      "Génération des bulletins PDF avec en-tête et modèle configurables",
+      "Réclamations et révisions de notes",
+    ],
+  },
+  {
+    icon: TrendingUp,
+    title: "Comptabilité & écolage",
+    purpose: "Toute la gestion financière de l'établissement.",
+    features: [
+      "Structures et catégories de frais, écolage par classe",
+      "Encaissements, reçus vérifiables, situation financière par classe",
+      "Dépenses et journal des transactions",
+      "Caisses multiples (dont Mobile Money) et soldes",
+    ],
+  },
+  {
+    icon: Briefcase,
+    title: "Personnel & Paie",
+    purpose: "Ressources humaines et paie du personnel, connectées à la comptabilité.",
+    features: [
+      "Fiches employés, grilles salariales et rubriques de paie",
+      "Cycles de paie mensuels : bulletins PDF, validation et décaissement en caisse",
+      "Ancienneté, CNSS et ITS calculés automatiquement (paramétrables)",
+    ],
+  },
+  {
+    icon: Archive,
+    title: "Archives & documents",
+    purpose: "Production et conservation des documents administratifs.",
+    features: [
+      "Modèles de documents (certificats, attestations) avec en-tête et filigrane par école",
+      "Archivage des documents générés, corbeille et restauration",
+      "Classement par tags",
+    ],
+  },
+  {
+    icon: BarChart3,
+    title: "Statistiques & pilotage",
+    purpose: "Indicateurs de direction alignés sur la carte scolaire (MEPSTA).",
+    features: [
+      "Filtres par année, classe et sexe",
+      "Indicateurs d'effectifs, de réussite et de vie scolaire",
+      "Export PDF et Excel sur chaque section",
+    ],
+  },
+  {
+    icon: Calendar,
+    title: "Calendrier",
+    purpose: "Les événements de l'année scolaire.",
+    features: ["Événements, échéances et jalons de l'année académique active"],
+  },
+  {
+    icon: Smartphone,
+    title: "Portail parents & élèves",
+    purpose: "Consultation à distance via une API dédiée (voir la section API).",
+    features: [
+      "Notes, bulletins PDF, présences et scolarité par enfant",
+      "Calendrier et informations de l'établissement",
+      "Authentifié par token (Laravel Sanctum)",
+    ],
+  },
+  {
+    icon: Shield,
+    title: "Administration",
+    purpose: "Gestion des accès et traçabilité.",
+    features: [
+      "Utilisateurs, rôles et permissions (contrôle d'accès fin)",
+      "Affectations enseignant / matière / classe",
+      "Journal d'audit des actions et gestion des accès portail",
+    ],
+  },
+  {
+    icon: Settings,
+    title: "Paramètres",
+    purpose: "La configuration de référence de l'établissement.",
+    features: [
+      "École, classes, types de classes, matières, pays",
+      "Années et périodes académiques, types d'évaluation",
+      "Catégories et structures de frais, bourses, calcul des moyennes",
+      "Fichiers & stockage (local / S3), modèles de documents, sauvegardes",
+    ],
+  },
 ];
 
 export default function DocumentationPage() {
@@ -375,6 +515,35 @@ $u->assignRole(App\\Constants\\Roles::ADMINISTRATOR); // le matricule est géné
                   <ConceptCard icon={Database} title="Données">
                     PostgreSQL, migrations Laravel, identifiants UUID, dictionnaire des tables documenté dans le dépôt.
                   </ConceptCard>
+                </div>
+              </DocSection>
+
+              {/* 7bis. Les modules en détail */}
+              <DocSection id="modules" eyebrow="Comprendre" title="Les modules en détail">
+                <p>
+                  Dalibi s&apos;organise en modules accessibles depuis le menu latéral. Chacun regroupe des fonctions
+                  cohérentes, filtrées par vos permissions. Voici ce que couvre chaque module.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-5 not-prose">
+                  {modules.map((m) => (
+                    <div key={m.title} className="card p-5 flex flex-col">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <m.icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <h3 className="font-bold text-foreground">{m.title}</h3>
+                      </div>
+                      <p className="text-sm text-muted mb-3">{m.purpose}</p>
+                      <ul className="mt-auto space-y-1.5 text-sm text-muted">
+                        {m.features.map((f) => (
+                          <li key={f} className="flex gap-2">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               </DocSection>
 
