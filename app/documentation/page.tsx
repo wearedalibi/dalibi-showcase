@@ -216,6 +216,13 @@ export default function DocumentationPage() {
                   <strong>React 19 + TypeScript</strong> reliée par <strong>Inertia.js</strong> (SPA sans API séparée),
                   sur <strong>PostgreSQL</strong>. En auto-hébergement, vos données restent chez vous.
                 </p>
+                <Callout tone="info" title="Version stable : v1.0.0">
+                  La première version stable est publiée. Ce guide décrit la{" "}
+                  <a href={GITHUB_URL + "/releases/tag/v1.0.0"} target="_blank" rel="noopener noreferrer">v1.0.0</a>{" "}
+                  — voir le{" "}
+                  <a href={GITHUB_URL + "/blob/main/CHANGELOG.md"} target="_blank" rel="noopener noreferrer">journal des versions</a>.
+                </Callout>
+
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 pt-2">
                   <ConceptCard icon={GraduationCap} title="Scolarité">
                     Élèves & inscriptions, notes & bulletins, examens officiels, présences, emploi du temps.
