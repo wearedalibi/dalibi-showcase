@@ -6,6 +6,7 @@ import {
   Shield, ShieldCheck, Smartphone, Terminal, TrendingUp, UserCheck, Users, Wallet, Workflow,
 } from "lucide-react";
 import { SiGithub } from "react-icons/si";
+import { DocsIllustration } from "@/components/landing/illustrations";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { PageHero } from "@/components/landing/page-hero";
 import { SiteHeader } from "@/components/landing/site-header";
@@ -184,6 +185,7 @@ export default function DocumentationPage() {
         badge={{ label: "Documentation", icon: BookOpen }}
         title="Prise en main de Dalibi, de A à Z"
         description="Installez, configurez, lancez et comprenez Dalibi. Ce guide vous mène du dépôt vide à une instance fonctionnelle que vous maîtrisez."
+        illustration={<DocsIllustration className="w-full max-w-sm h-auto" />}
       />
 
       <main className="flex-1">
@@ -727,6 +729,13 @@ database/
                   <strong>Laravel Sanctum</strong> : notes, bulletins PDF, présences, scolarité et calendrier. La
                   spécification <strong>OpenAPI 3.1</strong> est fournie dans le dépôt.
                 </p>
+                <Callout tone="info" title="Le portail se configure dans les réglages — désactivé par défaut">
+                  Le portail (et donc son API) s&apos;active <strong>au niveau de l&apos;école</strong> depuis
+                  Paramètres → École. Surtout, l&apos;accès de chaque parent/élève est <strong>désactivé par
+                  défaut</strong> : il faut l&apos;<strong>activer compte par compte</strong> depuis Administration →
+                  Accès portail. Tant qu&apos;un compte n&apos;est pas activé, il ne peut ni se connecter au portail ni
+                  consommer l&apos;API.
+                </Callout>
                 <a href={OPENAPI_URL} target="_blank" rel="noopener noreferrer" className="btn btn-secondary w-fit">
                   <Server className="w-4 h-4" /> Spécification OpenAPI
                 </a>
