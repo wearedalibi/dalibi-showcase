@@ -327,7 +327,7 @@ docker compose exec app php artisan storage:link`}
                 <Callout tone="info">
                   Le service <strong>scheduler</strong> doit tourner en <strong>un seul exemplaire</strong> (sinon
                   sauvegardes en double). Détails et fichiers de déploiement dans le{" "}
-                  <a href={`${GITHUB_URL}/blob/main/docs/exploitation/deploiement.md`} target="_blank" rel="noopener noreferrer">guide de déploiement</a>.
+                  <a href={`${GITHUB_URL}/blob/main/documentations/exploitation/deploiement.md`} target="_blank" rel="noopener noreferrer">guide de déploiement</a>.
                 </Callout>
               </DocSection>
 
@@ -362,7 +362,7 @@ MATRICULE_COUNTRY_CODE=TG`}
                 <p className="text-sm">
                   Le <strong>stockage des fichiers</strong> (local ou S3/R2) se configure ensuite depuis l&apos;interface
                   (Paramètres → Fichiers & Stockage), pas seulement via <C>.env</C>. Voir aussi la{" "}
-                  <a href={`${GITHUB_URL}/blob/main/docs/getting-started/configuration-env.md`} target="_blank" rel="noopener noreferrer">référence complète du <C>.env</C></a>.
+                  <a href={`${GITHUB_URL}/blob/main/documentations/prise-en-main/configuration-env.md`} target="_blank" rel="noopener noreferrer">référence complète du <C>.env</C></a>.
                 </p>
               </DocSection>
 
@@ -608,7 +608,7 @@ php artisan storage:link`}
                 <p className="text-sm">
                   Une image et une configuration <strong>Docker</strong> (services app / worker / scheduler / PostgreSQL)
                   sont fournies — voir le{" "}
-                  <a href={`${GITHUB_URL}/blob/main/docs/exploitation/deploiement.md`} target="_blank" rel="noopener noreferrer">guide de déploiement</a>.
+                  <a href={`${GITHUB_URL}/blob/main/documentations/exploitation/deploiement.md`} target="_blank" rel="noopener noreferrer">guide de déploiement</a>.
                 </p>
               </DocSection>
 
@@ -800,7 +800,7 @@ database/
                 <p className="text-sm">
                   Vous pouvez créer un <strong>rôle personnalisé</strong> depuis Administration → Rôles & permissions : il
                   fonctionne aussitôt (menus, routes, cartes). Détails :{" "}
-                  <a href={`${GITHUB_URL}/blob/main/docs/administration/roles-permissions.md`} target="_blank" rel="noopener noreferrer">guide rôles & permissions</a>.
+                  <a href={`${GITHUB_URL}/blob/main/documentations/administration/roles-permissions.md`} target="_blank" rel="noopener noreferrer">guide rôles & permissions</a>.
                 </p>
 
                 <div className="pt-2">
@@ -995,7 +995,7 @@ php artisan queue:restart`}
                   <a href={`${GITHUB_URL}/blob/main/CONTRIBUTING.md`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
                     <Terminal className="w-4 h-4" /> Guide de contribution
                   </a>
-                  <a href={`${GITHUB_URL}/blob/main/docs/index.md`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+                  <a href={`${GITHUB_URL}/blob/main/documentations/README.md`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
                     <BookOpen className="w-4 h-4" /> Toute la documentation
                   </a>
                 </div>
