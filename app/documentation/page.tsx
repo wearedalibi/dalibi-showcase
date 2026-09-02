@@ -438,9 +438,10 @@ MAIL_FROM_NAME="\${APP_NAME}"`}
                       <tr>
                         <td className="py-2.5 pr-4 align-top"><C>DatabaseSeeder</C> <span className="text-xs">(défaut de <C>db:seed</C>)</span></td>
                         <td className="py-2.5 pr-4 align-top">
-                          ReferenceData + DefaultUsers + modèles de documents + élèves fictifs.
+                          ReferenceData + DefaultUsers + modèles de documents + élèves fictifs (inscrits à
+                          l&apos;année active).
                         </td>
-                        <td className="py-2.5 align-top">Dev / démo — <strong>pas en prod</strong>.</td>
+                        <td className="py-2.5 align-top">Dev / démo — <strong>bloqué en prod</strong>.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -469,9 +470,15 @@ comptable@dalibi.tg    →  Comptable
 secretaire@dalibi.tg   →  Secrétaire
 # Mot de passe commun : password`}
                   />
-                  <Callout tone="warn" title="À ne jamais laisser en production">
-                    Ces comptes utilisent un mot de passe connu et le <C>DatabaseSeeder</C> injecte des élèves fictifs.
-                    N&apos;exécutez jamais <C>db:seed</C> (sans classe) sur une instance réelle.
+                  <Callout tone="info" title="Changement de mot de passe imposé">
+                    Ces comptes portent un mot de passe connu : à la première connexion, l&apos;application{" "}
+                    <strong>oblige à en définir un nouveau</strong> avant de donner accès au reste de l&apos;interface.
+                  </Callout>
+                  <Callout tone="warn" title="Protection automatique en production">
+                    Les seeders de démonstration (<C>DefaultUsersSeeder</C>, <C>StudentTestSeeder</C>) sont{" "}
+                    <strong>automatiquement ignorés</strong> lorsque <C>APP_ENV=production</C> — même avec{" "}
+                    <C>db:seed --force</C>. Un <C>db:seed</C> en production n&apos;installe donc que les données de
+                    référence.
                   </Callout>
                 </div>
 
@@ -515,6 +522,11 @@ $u->assignRole(App\\Constants\\Roles::ADMINISTRATOR); // le matricule est géné
                     Connectez-vous, puis suivez l&apos;ordre logique (les catalogues classes/matières/frais sont déjà
                     pré-remplis par <C>ReferenceDataSeeder</C> — il reste à les adapter à votre école) :
                   </p>
+                  <Callout tone="info" title="Provisionnement automatique">
+                    À la <strong>création d&apos;un établissement</strong>, son <strong>en-tête de documents</strong> et
+                    son <strong>modèle de bulletin</strong> par défaut sont générés automatiquement — rien à seeder.
+                  </Callout>
+                  <div className="h-4" />
                   <div className="space-y-5">
                     <Step n={1} title="Paramétrer l'établissement">
                       École (nom, logo, en-tête des documents), <strong>année académique</strong> active, périodes
@@ -857,7 +869,7 @@ database/
               <DocSection id="securite" eyebrow="Exploiter" title="Sécurité & bonnes pratiques">
                 <ul className="space-y-1.5 text-sm text-muted">
                   {[
-                    "Changez les mots de passe de démonstration (ou ne seedez pas DefaultUsersSeeder en production).",
+                    "Les comptes de démonstration sont bloqués en production et imposent un changement de mot de passe à la première connexion — ne contournez pas ce garde-fou.",
                     "APP_DEBUG=false en production, et ne commitez jamais l'APP_KEY ni le .env.",
                     "Servez toujours en HTTPS ; forcez la redirection HTTP → HTTPS.",
                     "Activez la double authentification (2FA) sur les comptes à privilèges (administrateur, direction).",
