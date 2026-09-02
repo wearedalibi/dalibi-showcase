@@ -25,7 +25,9 @@ function registerFadeUps(gsap: typeof import("gsap").gsap) {
       force3D: true,
       immediateRender: false,
       willChange: "transform, opacity",
-      onComplete: () => gsap.set(element, { willChange: "auto", clearProps: "transform" }),
+      onComplete: () => {
+        gsap.set(element, { willChange: "auto", clearProps: "transform" });
+      },
       scrollTrigger: { trigger: element, start: "top 90%", once: true },
     });
   }
@@ -43,7 +45,9 @@ function registerStaggerUps(gsap: typeof import("gsap").gsap) {
       force3D: true,
       immediateRender: false,
       willChange: "transform, opacity",
-      onComplete: () => gsap.set(parent.children, { willChange: "auto", clearProps: "transform" }),
+      onComplete: () => {
+        gsap.set(parent.children, { willChange: "auto", clearProps: "transform" });
+      },
       scrollTrigger: { trigger: parent, start: "top 88%", once: true },
     });
   }
@@ -64,7 +68,9 @@ function registerModuleCards(gsap: typeof import("gsap").gsap) {
         force3D: true,
         immediateRender: false,
         willChange: "transform, opacity",
-        onComplete: () => gsap.set(card, { willChange: "auto", clearProps: "transform" }),
+        onComplete: () => {
+          gsap.set(card, { willChange: "auto", clearProps: "transform" });
+        },
         scrollTrigger: { trigger: card, start: "top 90%", once: true },
       },
     );
