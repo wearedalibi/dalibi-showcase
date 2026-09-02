@@ -29,13 +29,19 @@ const nav: DocNavItem[] = [
   { id: "installation", label: "Installation locale" },
   { id: "docker", label: "Installation Docker" },
   { id: "configuration", label: "Configuration (.env)" },
+  { id: "email", label: "E-mails (SMTP)" },
   { id: "demarrage", label: "Seeding & démarrage" },
+  { id: "production", label: "Mise en production" },
   { id: "architecture", label: "Comprendre l'app" },
   { id: "modules", label: "Les modules" },
   { id: "roles", label: "Rôles & permissions" },
   { id: "stockage", label: "Stockage & fichiers" },
   { id: "sauvegardes", label: "Sauvegardes" },
   { id: "api", label: "API du portail" },
+  { id: "securite", label: "Sécurité" },
+  { id: "maj", label: "Mise à jour" },
+  { id: "depannage", label: "Dépannage" },
+  { id: "glossaire", label: "Glossaire" },
   { id: "contribuer", label: "Contribuer" },
 ];
 
@@ -360,6 +366,36 @@ MATRICULE_COUNTRY_CODE=TG`}
                 </p>
               </DocSection>
 
+              {/* 5bis. E-mails */}
+              <DocSection id="email" eyebrow="Étape 3b" title="Configurer les e-mails (SMTP)">
+                <p>
+                  Dalibi envoie des e-mails (notifications, <strong>alerte d&apos;échec de sauvegarde</strong>, accès
+                  portail…). La messagerie se configure via les variables <C>MAIL_*</C> de Laravel. En développement, la
+                  valeur par défaut <C>MAIL_MAILER=log</C> écrit les mails dans les logs (aucun envoi réel).
+                </p>
+                <Code
+                  title=".env — envoi réel (SMTP)"
+                  code={`MAIL_MAILER=smtp
+MAIL_HOST=smtp.votre-fournisseur.com
+MAIL_PORT=587
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_FROM_ADDRESS=no-reply@votre-domaine.tg   # sur un domaine que vous contrôlez
+MAIL_FROM_NAME="\${APP_NAME}"`}
+                />
+                <Callout tone="warn" title="Délivrabilité : éviter les spams">
+                  Pour que les mails arrivent en boîte de réception, l&apos;adresse <C>MAIL_FROM_ADDRESS</C> doit être sur
+                  un <strong>domaine authentifié</strong> : configurez <strong>SPF</strong>, <strong>DKIM</strong> et{" "}
+                  <strong>DMARC</strong> dans votre DNS, via un fournisseur transactionnel (Brevo, Mailgun, Postmark,
+                  Resend…). Un domaine non authentifié part en spam. Testez avec{" "}
+                  <a href="https://www.mail-tester.com" target="_blank" rel="noopener noreferrer">mail-tester.com</a>.
+                </Callout>
+                <p className="text-sm">
+                  Rappel : les e-mails et les sauvegardes manuelles passent par la file d&apos;attente — un{" "}
+                  <strong>worker</strong> doit tourner (voir Installation et Mise en production).
+                </p>
+              </DocSection>
+
               {/* 6. Seeding & premier démarrage */}
               <DocSection id="demarrage" eyebrow="Étape 4" title="Seeding & premier démarrage">
                 <p>
@@ -499,6 +535,69 @@ $u->assignRole(App\\Constants\\Roles::ADMINISTRATOR); // le matricule est géné
                     </Step>
                   </div>
                 </div>
+              </DocSection>
+
+              {/* 6bis. Mise en production */}
+              <DocSection id="production" eyebrow="Étape 5" title="Mise en production">
+                <p>
+                  Passer d&apos;un lancement local à une instance de production demande quelques réglages de robustesse et
+                  de sécurité.
+                </p>
+
+                <div className="space-y-6 pt-1">
+                  <Step n={1} title="Régler l'environnement">
+                    <Code
+                      title=".env"
+                      code={`APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://ecole.votre-domaine.tg
+# APP_KEY doit être défini (php artisan key:generate) et gardé secret`}
+                    />
+                  </Step>
+                  <Step n={2} title="Installer et compiler pour la prod">
+                    <Code
+                      shell
+                      code={`composer install --no-dev --optimize-autoloader
+npm ci && npm run build
+php artisan optimize        # config:cache + route:cache + view:cache
+php artisan storage:link`}
+                    />
+                  </Step>
+                  <Step n={3} title="Servir derrière HTTPS">
+                    <p className="text-sm">
+                      Un <strong>reverse proxy</strong> (Nginx ou Caddy) devant PHP-FPM, avec un certificat TLS
+                      (Let&apos;s Encrypt). Assurez-vous qu&apos;il transmet l&apos;en-tête <C>X-Forwarded-Proto</C> pour
+                      que Laravel génère des URLs en <C>https</C>.
+                    </p>
+                  </Step>
+                  <Step n={4} title="Worker de file d'attente en service">
+                    <p className="text-sm">
+                      Indispensable (sinon e-mails et sauvegardes manuelles ne partent jamais). À superviser avec
+                      systemd ou Supervisor pour redémarrage automatique :
+                    </p>
+                    <Code shell code={`php artisan queue:work --tries=3`} />
+                  </Step>
+                  <Step n={5} title="Planificateur (tâches automatiques)">
+                    <p className="text-sm">Une seule entrée cron qui déclenche le planificateur Laravel :</p>
+                    <Code title="crontab" code={`* * * * * cd /chemin/app && php artisan schedule:run >> /dev/null 2>&1`} />
+                  </Step>
+                  <Step n={6} title="Droits & prérequis">
+                    <p className="text-sm">
+                      <C>storage/</C> et <C>bootstrap/cache/</C> accessibles en écriture par le serveur web ;{" "}
+                      <C>pg_dump</C> / <C>pg_restore</C> installés pour les sauvegardes SQL natives.
+                    </p>
+                  </Step>
+                </div>
+
+                <Callout tone="warn" title="Un seul planificateur">
+                  N&apos;exécutez qu&apos;<strong>un seul</strong> scheduler (une seule machine / un seul conteneur) —
+                  sinon les sauvegardes planifiées se déclenchent en double.
+                </Callout>
+                <p className="text-sm">
+                  Une image et une configuration <strong>Docker</strong> (services app / worker / scheduler / PostgreSQL)
+                  sont fournies — voir le{" "}
+                  <a href={`${GITHUB_URL}/blob/main/docs/exploitation/deploiement.md`} target="_blank" rel="noopener noreferrer">guide de déploiement</a>.
+                </p>
               </DocSection>
 
               {/* 7. Architecture */}
@@ -743,9 +842,112 @@ database/
                   Accès portail. Tant qu&apos;un compte n&apos;est pas activé, il ne peut ni se connecter au portail ni
                   consommer l&apos;API.
                 </Callout>
+                <p className="text-sm">
+                  <strong>Côté parent/élève</strong> : une fois son accès activé (Administration → Accès portail), la
+                  personne reçoit ses identifiants, se connecte au portail et consulte — pour chacun de ses enfants — ses
+                  notes, bulletins, présences, la scolarité et le calendrier. Aucune saisie : c&apos;est une vue en
+                  lecture seule alimentée par l&apos;API.
+                </p>
                 <a href={OPENAPI_URL} target="_blank" rel="noopener noreferrer" className="btn btn-secondary w-fit">
                   <Server className="w-4 h-4" /> Spécification OpenAPI
                 </a>
+              </DocSection>
+
+              {/* Sécurité */}
+              <DocSection id="securite" eyebrow="Exploiter" title="Sécurité & bonnes pratiques">
+                <ul className="space-y-1.5 text-sm text-muted">
+                  {[
+                    "Changez les mots de passe de démonstration (ou ne seedez pas DefaultUsersSeeder en production).",
+                    "APP_DEBUG=false en production, et ne commitez jamais l'APP_KEY ni le .env.",
+                    "Servez toujours en HTTPS ; forcez la redirection HTTP → HTTPS.",
+                    "Activez la double authentification (2FA) sur les comptes à privilèges (administrateur, direction).",
+                    "Appliquez le moindre privilège : donnez à chaque rôle uniquement les permissions nécessaires.",
+                    "Sauvegardez régulièrement et hors-site (règle 3-2-1) ; testez la restauration et l'intégrité (SHA-256).",
+                    "Les pièces sensibles (photos, justificatifs) sont déjà sur un disque privé (secure), hors du dossier public.",
+                    "Le journal d'audit trace les actions : consultez-le en cas d'incident.",
+                  ].map((s) => (
+                    <li key={s} className="flex gap-2">
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
+                      <span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </DocSection>
+
+              {/* Mise à jour */}
+              <DocSection id="maj" eyebrow="Exploiter" title="Mettre à jour l'application">
+                <Callout tone="warn" title="Sauvegardez d'abord">
+                  Faites une sauvegarde (base + médias) avant toute mise à jour, et lisez les notes de version.
+                </Callout>
+                <Code
+                  shell
+                  code={`# 1. Récupérer la nouvelle version
+git pull
+
+# 2. Dépendances
+composer install --no-dev --optimize-autoloader
+npm ci && npm run build
+
+# 3. Base de données
+php artisan migrate --force
+
+# 4. Rafraîchir les caches
+php artisan optimize:clear
+php artisan optimize
+
+# 5. Redémarrer le worker (recharge le code)
+php artisan queue:restart`}
+                />
+              </DocSection>
+
+              {/* Dépannage */}
+              <DocSection id="depannage" eyebrow="Aide" title="Dépannage (problèmes fréquents)">
+                <div className="space-y-4">
+                  {[
+                    ["Les sauvegardes ou e-mails restent « en attente »", "Le worker de file d'attente ne tourne pas. Lancez php artisan queue:work (et supervisez-le en service)."],
+                    ["Logos / images en 404", "Le lien symbolique manque : php artisan storage:link."],
+                    ["Erreur 500 / « Permission denied » à l'écriture", "Droits insuffisants sur storage/ et bootstrap/cache/ pour l'utilisateur du serveur web."],
+                    ["La sauvegarde SQL échoue en production", "pg_dump / pg_restore ne sont pas installés. Installez le client PostgreSQL (l'app bascule sinon sur l'export portable)."],
+                    ["Erreur 419 « Page expirée » à la connexion", "Problème de session/CSRF : vérifiez APP_URL, le domaine des cookies et que le proxy transmet bien le HTTPS (X-Forwarded-Proto)."],
+                    ["Styles/JS non chargés ou « contenu mixte »", "APP_URL doit être en https et le reverse proxy doit transmettre X-Forwarded-Proto."],
+                    ["Les tâches planifiées ne s'exécutent pas", "Le cron du planificateur est absent : ajoutez * * * * * php artisan schedule:run."],
+                    ["Anciennes pages après un déploiement", "Videz les caches : php artisan optimize:clear puis php artisan optimize."],
+                  ].map(([q, a]) => (
+                    <div key={q} className="card p-4">
+                      <p className="font-semibold text-foreground text-sm mb-1">{q}</p>
+                      <p className="text-sm text-muted">{a}</p>
+                    </div>
+                  ))}
+                </div>
+              </DocSection>
+
+              {/* Glossaire */}
+              <DocSection id="glossaire" eyebrow="Référence" title="Glossaire métier">
+                <p>
+                  Dalibi gère <strong>un ou plusieurs établissements</strong> (table <C>schools</C>) ; certains paramètres
+                  (modèles de bulletin et de documents, en-tête, calcul des moyennes, examens officiels, emploi du temps)
+                  sont définis <strong>par école</strong>.
+                </p>
+                <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  {[
+                    ["Année académique", "Le cycle scolaire (ex. 2024-2025). Une seule est active à la fois."],
+                    ["Période", "Découpage de l'année : trimestre ou semestre, selon le type de classe."],
+                    ["Type de classe", "Catégorie (maternelle, primaire, collège…) qui pilote les règles de moyennes."],
+                    ["Structure / catégorie de frais", "Le barème d'écolage et sa ventilation, par classe."],
+                    ["Écolage", "Les frais de scolarité facturés et encaissés."],
+                    ["Bulletin", "Le relevé de notes périodique, généré en PDF depuis un modèle."],
+                    ["Matricule", "L'identifiant unique d'un utilisateur ou d'un élève (préfixe par rôle)."],
+                    ["Rôle / Permission", "Un rôle est un ensemble de permissions ; l'accès est piloté par permissions."],
+                    ["Caisse", "Un compte de trésorerie (espèces, Mobile Money…) pour encaissements et dépenses."],
+                    ["Rubrique de paie", "Un élément de bulletin de salaire (gain ou retenue)."],
+                    ["Portail", "L'espace de consultation des parents/élèves, alimenté par l'API."],
+                  ].map(([term, def]) => (
+                    <div key={term}>
+                      <dt className="font-semibold text-foreground">{term}</dt>
+                      <dd className="text-muted">{def}</dd>
+                    </div>
+                  ))}
+                </dl>
               </DocSection>
 
               {/* 12. Contribuer */}
