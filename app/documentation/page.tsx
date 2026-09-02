@@ -26,7 +26,7 @@ const nav: DocNavItem[] = [
   { id: "installation", label: "Installation locale" },
   { id: "docker", label: "Installation Docker" },
   { id: "configuration", label: "Configuration (.env)" },
-  { id: "demarrage", label: "Premier démarrage" },
+  { id: "demarrage", label: "Seeding & démarrage" },
   { id: "architecture", label: "Comprendre l'app" },
   { id: "roles", label: "Rôles & permissions" },
   { id: "stockage", label: "Stockage & fichiers" },
@@ -120,14 +120,15 @@ php artisan key:generate`} />
                   <Step n={3} title="Créer le schéma et les données de base">
                     <Code
                       shell
-                      code={`# Tables + rôles/permissions + (optionnel) données de démo
+                      code={`# Développement : schéma + données de référence + comptes de démo
 php artisan migrate --seed
 # Lien symbolique pour les fichiers publics
 php artisan storage:link`}
                     />
                     <p className="text-sm">
-                      Le seeding crée les <strong>rôles et permissions</strong>. Le seeder de démo (
-                      <C>SchoolDemoSeeder</C>) ajoute une école et des données d&apos;exemple.
+                      <C>--seed</C> exécute le <C>DatabaseSeeder</C> (données de <strong>démonstration</strong>, dont
+                      des comptes prêts à l&apos;emploi). Pour la production, on seede uniquement les données de
+                      référence — voir <a href="#demarrage">Seeding &amp; premier démarrage</a>.
                     </p>
                   </Step>
                   <Step n={4} title="Compiler l'interface et lancer le serveur">
@@ -217,42 +218,137 @@ MATRICULE_COUNTRY_CODE=TG`}
                 </p>
               </DocSection>
 
-              {/* 6. Premier démarrage */}
-              <DocSection id="demarrage" eyebrow="Étape 4" title="Premier démarrage dans l'application">
+              {/* 6. Seeding & premier démarrage */}
+              <DocSection id="demarrage" eyebrow="Étape 4" title="Seeding & premier démarrage">
                 <p>
-                  L&apos;inscription publique est <strong>désactivée</strong> : les comptes sont créés par un
-                  administrateur. Pour créer le <strong>premier administrateur</strong>, utilisez Tinker :
+                  Le <strong>seeding</strong> pré-remplit la base. C&apos;est aussi par là que naît le{" "}
+                  <strong>premier utilisateur</strong> : l&apos;inscription publique est désactivée, aucun compte ne peut
+                  s&apos;auto-créer. Quatre points d&apos;entrée existent, du plus minimal au plus complet :
                 </p>
-                <Code
-                  shell
-                  title="php artisan tinker"
-                  code={`$u = App\\Models\\User::create([
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b border-border text-left text-foreground">
+                        <th className="py-2 pr-4 font-semibold">Seeder</th>
+                        <th className="py-2 pr-4 font-semibold">Contenu</th>
+                        <th className="py-2 font-semibold">Usage</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-muted">
+                      <tr className="border-b border-border/60">
+                        <td className="py-2.5 pr-4 align-top"><C>RolesAndPermissionsSeeder</C></td>
+                        <td className="py-2.5 pr-4 align-top">~145 permissions + les rôles de base.</td>
+                        <td className="py-2.5 align-top">Minimum vital.</td>
+                      </tr>
+                      <tr className="border-b border-border/60">
+                        <td className="py-2.5 pr-4 align-top"><C>ReferenceDataSeeder</C></td>
+                        <td className="py-2.5 pr-4 align-top">
+                          Rôles/permissions <strong>+ catalogues</strong> : pays, types de classes, classes PS→Tle,
+                          matières, catégories de frais, types d&apos;évaluation, bourses, tags. Idempotent, sans données
+                          de démo.
+                        </td>
+                        <td className="py-2.5 align-top"><strong>Production</strong>.</td>
+                      </tr>
+                      <tr className="border-b border-border/60">
+                        <td className="py-2.5 pr-4 align-top"><C>DefaultUsersSeeder</C></td>
+                        <td className="py-2.5 pr-4 align-top">
+                          École « École Centrale » + <strong>1 compte par rôle</strong> (mot de passe <C>password</C>).
+                        </td>
+                        <td className="py-2.5 align-top">Démo / dev.</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 pr-4 align-top"><C>DatabaseSeeder</C> <span className="text-xs">(défaut de <C>db:seed</C>)</span></td>
+                        <td className="py-2.5 pr-4 align-top">
+                          ReferenceData + DefaultUsers + modèles de documents + élèves fictifs.
+                        </td>
+                        <td className="py-2.5 align-top">Dev / démo — <strong>pas en prod</strong>.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Dev / démo */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">Développement / démo — connexion immédiate</h3>
+                  <p className="text-sm mb-3">
+                    <C>php artisan migrate --seed</C> exécute le <C>DatabaseSeeder</C> : vous obtenez une école et{" "}
+                    <strong>cinq comptes prêts à l&apos;emploi</strong>, tous avec le mot de passe <C>password</C>.
+                  </p>
+                  <Code
+                    title="Comptes de démonstration"
+                    code={`admin@dalibi.tg        →  Administrateur
+directeur@dalibi.tg    →  Directeur
+enseignant@dalibi.tg   →  Enseignant
+comptable@dalibi.tg    →  Comptable
+secretaire@dalibi.tg   →  Secrétaire
+# Mot de passe commun : password`}
+                  />
+                  <Callout tone="warn" title="À ne jamais laisser en production">
+                    Ces comptes utilisent un mot de passe connu et le <C>DatabaseSeeder</C> injecte des élèves fictifs.
+                    N&apos;exécutez jamais <C>db:seed</C> (sans classe) sur une instance réelle.
+                  </Callout>
+                </div>
+
+                {/* Production */}
+                <div className="pt-4">
+                  <h3 className="font-semibold text-foreground mb-2">Production — seeding prod-safe + premier admin</h3>
+                  <p className="text-sm mb-3">
+                    En production, on migre puis on ne seede que les <strong>données de référence</strong> (aucun compte
+                    de démo, aucun élève fictif) :
+                  </p>
+                  <Code
+                    shell
+                    code={`php artisan migrate
+php artisan db:seed --class=ReferenceDataSeeder`}
+                  />
+                  <p className="text-sm mt-3 mb-2">
+                    Il ne reste plus qu&apos;à créer votre <strong>premier administrateur</strong>. Via Tinker :
+                  </p>
+                  <Code
+                    title="php artisan tinker"
+                    code={`$u = App\\Models\\User::create([
     'firstname' => 'Admin',
     'lastname'  => 'École',
     'email'     => 'admin@monecole.tg',
-    'password'  => bcrypt('motdepasse'),
+    'gender'    => 'male',
+    'password'  => 'un-mot-de-passe-fort', // haché automatiquement
 ]);
-$u->assignRole(App\\Constants\\Roles::ADMINISTRATOR);`}
-                />
-                <p>Connectez-vous, puis configurez l&apos;école dans l&apos;ordre logique :</p>
-                <div className="space-y-5 pt-1">
-                  <Step n={1} title="Paramétrer l'établissement">
-                    École (nom, logo, en-tête des documents), <strong>année académique</strong> active, périodes
-                    (trimestres/semestres), types de classes, classes et matières.
-                  </Step>
-                  <Step n={2} title="Définir la scolarité financière">
-                    Catégories et <strong>structures de frais</strong>, bourses éventuelles, caisses.
-                  </Step>
-                  <Step n={3} title="Créer les comptes du personnel">
-                    Utilisateurs (enseignants, secrétariat, comptabilité) avec leurs <strong>rôles</strong>.
-                  </Step>
-                  <Step n={4} title="Inscrire les élèves">
-                    Dossiers élèves, <strong>inscriptions</strong> à l&apos;année active, affectation aux classes.
-                  </Step>
-                  <Step n={5} title="Faire vivre l'année">
-                    Appel des présences, saisie des notes, génération des <strong>bulletins</strong>, encaissement de
-                    l&apos;écolage, documents et archives.
-                  </Step>
+$u->assignRole(App\\Constants\\Roles::ADMINISTRATOR); // le matricule est généré automatiquement`}
+                  />
+                  <p className="text-sm mt-3">
+                    Alternative rapide : lancer <C>db:seed --class=DefaultUsersSeeder</C> puis{" "}
+                    <strong>changer immédiatement le mot de passe</strong> du compte <C>admin@dalibi.tg</C> et supprimer
+                    les comptes de démo superflus.
+                  </p>
+                </div>
+
+                {/* Onboarding */}
+                <div className="pt-4">
+                  <h3 className="font-semibold text-foreground mb-3">Configurer l&apos;établissement</h3>
+                  <p className="text-sm mb-4">
+                    Connectez-vous, puis suivez l&apos;ordre logique (les catalogues classes/matières/frais sont déjà
+                    pré-remplis par <C>ReferenceDataSeeder</C> — il reste à les adapter à votre école) :
+                  </p>
+                  <div className="space-y-5">
+                    <Step n={1} title="Paramétrer l'établissement">
+                      École (nom, logo, en-tête des documents), <strong>année académique</strong> active, périodes
+                      (trimestres/semestres), classes et matières.
+                    </Step>
+                    <Step n={2} title="Définir la scolarité financière">
+                      <strong>Structures de frais</strong> (à partir des catégories seedées), bourses éventuelles, caisses.
+                    </Step>
+                    <Step n={3} title="Créer les comptes du personnel">
+                      Utilisateurs (enseignants, secrétariat, comptabilité) avec leurs <strong>rôles</strong>.
+                    </Step>
+                    <Step n={4} title="Inscrire les élèves">
+                      Dossiers élèves, <strong>inscriptions</strong> à l&apos;année active, affectation aux classes.
+                    </Step>
+                    <Step n={5} title="Faire vivre l'année">
+                      Appel des présences, saisie des notes, génération des <strong>bulletins</strong>, encaissement de
+                      l&apos;écolage, documents et archives.
+                    </Step>
+                  </div>
                 </div>
               </DocSection>
 
