@@ -495,26 +495,141 @@ $u->assignRole(App\\Constants\\Roles::ADMINISTRATOR); // le matricule est géné
               {/* 7. Architecture */}
               <DocSection id="architecture" eyebrow="Comprendre" title="Comment l'application est construite">
                 <p>
-                  Dalibi est un <strong>monolithe modulaire</strong> : une seule application Laravel rend les pages React
-                  via Inertia (pas d&apos;API REST séparée pour l&apos;interface). La logique métier est regroupée dans des{" "}
-                  <strong>services</strong> dédiés, et l&apos;accès est filtré par permissions à chaque route.
+                  Dalibi est un <strong>monolithe modulaire</strong> : une seule application Laravel qui rend directement
+                  des pages React via <strong>Inertia.js</strong>. Il n&apos;y a donc <strong>pas d&apos;API REST séparée
+                  pour l&apos;interface</strong> — le contrôleur renvoie une page et ses données en une fois. Une API REST
+                  distincte existe uniquement pour le <strong>portail parents/élèves</strong> (voir la section API). La
+                  logique métier est regroupée dans des <strong>services</strong>, et l&apos;accès est filtré par
+                  permission à chaque route.
                 </p>
+
                 <div className="grid sm:grid-cols-2 gap-4">
                   <ConceptCard icon={Layers3} title="Modules">
-                    Élèves, Notes & bulletins, Examens, Présences, Comptabilité, Personnel & paie, Archives, Emploi du
-                    temps, Statistiques, Administration, Paramètres.
+                    Un contrôleur et un jeu de pages par module ; la navigation (<C>menu.ts</C>) est la source unique des
+                    entrées, filtrée par permission.
                   </ConceptCard>
                   <ConceptCard icon={Workflow} title="Services métier">
-                    <C>GradingService</C> (moyennes/bulletins), <C>PayrollService</C> (paie), <C>BackupService</C>
-                    {" "}(sauvegardes), <C>MatriculeService</C> (identifiants).
+                    La logique complexe (paie, moyennes, compta, PDF…) vit dans des services testables, réutilisés par
+                    les contrôleurs et les commandes.
                   </ConceptCard>
                   <ConceptCard icon={Boxes} title="Front">
-                    Pages React/TS dans <C>resources/js/pages</C>, design-system maison, listes normalisées
-                    (filtres + bouton « Rechercher »).
+                    React 19 + TypeScript dans <C>resources/js/pages</C>, design-system maison, listes normalisées
+                    (filtres + bouton « Rechercher » + pagination).
                   </ConceptCard>
                   <ConceptCard icon={Database} title="Données">
-                    PostgreSQL, migrations Laravel, identifiants UUID, dictionnaire des tables documenté dans le dépôt.
+                    PostgreSQL, migrations Laravel, identifiants <strong>UUID</strong>, journal d&apos;audit des actions,
+                    dictionnaire des tables documenté.
                   </ConceptCard>
+                </div>
+
+                {/* Cycle d'une requête */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">Le cycle d&apos;une requête</h3>
+                  <p className="text-sm mb-3">
+                    Un clic sur un lien Inertia déclenche une requête serveur classique ; Laravel répond avec la page et
+                    ses données, React met à jour l&apos;écran sans rechargement complet.
+                  </p>
+                  <Code
+                    title="De l'URL à l'écran"
+                    code={`Navigateur  (Link Inertia)
+   │
+   ▼
+Route  routes/web.php   ──►  middleware  can:view_students
+   │
+   ▼
+Contrôleur  StudentController@index
+   │
+   ▼
+Service métier  ──►  Modèles Eloquent  ──►  PostgreSQL
+   │
+   ▼
+Inertia::render('Eleves/Index', props)
+   │
+   ▼
+Page React  resources/js/pages/Eleves/Index.tsx`}
+                  />
+                </div>
+
+                {/* Données partagées */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">Données partagées à chaque page</h3>
+                  <p className="text-sm">
+                    Inertia partage automatiquement, sur toutes les pages : l&apos;<strong>utilisateur connecté</strong>,
+                    ses <strong>rôles</strong> et la liste de ses <strong>permissions</strong>, ainsi que la{" "}
+                    <strong>monnaie</strong> de l&apos;établissement. C&apos;est ce qui permet au front de n&apos;afficher
+                    que les menus, cartes et actions autorisés — sans requête supplémentaire.
+                  </p>
+                </div>
+
+                {/* Structure du code */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">Structure du code</h3>
+                  <Code
+                    title="Arborescence"
+                    code={`app/
+├── Http/Controllers/   ← 1 contrôleur par écran / ressource
+├── Models/             ← entités Eloquent (UUID)
+├── Services/           ← logique métier réutilisable et testable
+├── Jobs/               ← tâches en file d'attente (sauvegardes, e-mails)
+├── Notifications/      ← e-mails (ex. échec de sauvegarde)
+└── Constants/          ← Roles, Permissions
+resources/js/
+├── pages/              ← pages React (Inertia)
+├── components/         ← design-system + composants partagés
+└── types/menu.ts       ← navigation (source des modules)
+routes/web.php          ← routes + gardes  can:*
+database/
+├── migrations/         ← schéma
+└── seeders/            ← données de référence & démo`}
+                  />
+                </div>
+
+                {/* Services métier */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">Les services métier</h3>
+                  <p className="text-sm mb-3">
+                    Le « cerveau » de l&apos;application. Chaque service isole une logique précise, ce qui la rend
+                    testable et réutilisable (contrôleurs, commandes CLI, jobs) :
+                  </p>
+                  <ul className="space-y-1.5 text-sm text-muted">
+                    {[
+                      ["GradingService", "calcul des moyennes et règles de notation (par type de classe, trimestre/semestre)"],
+                      ["ReportCardBuilder / BulletinRenderer", "construction des données puis rendu PDF fidèle des bulletins"],
+                      ["PayrollService", "paie : ancienneté, CNSS/ITS, génération des bulletins de salaire"],
+                      ["AccountingService", "écritures comptables : écolage, dépenses, mouvements de caisse"],
+                      ["InvoiceService", "reçus et factures"],
+                      ["StatisticsService", "indicateurs de pilotage et exports"],
+                      ["DocumentRenderer", "documents PDF (certificats) avec en-tête et filigrane"],
+                      ["MatriculeService", "génération des matricules et numéros d'enregistrement"],
+                      ["BackupService", "sauvegardes, archives d'année et restauration"],
+                    ].map(([name, desc]) => (
+                      <li key={name} className="flex gap-2">
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
+                        <span><C>{name}</C> — {desc}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Conventions transverses */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">Conventions transverses</h3>
+                  <ul className="space-y-1.5 text-sm text-muted">
+                    {[
+                      "Identifiants UUID sur toutes les tables (pas d'entiers auto-incrémentés exposés).",
+                      "Contrôle d'accès par permission à chaque route (can:*), et permissions partagées au front.",
+                      "Journal d'audit : les actions sensibles sont tracées (qui, quoi, quand).",
+                      "Listes normalisées : filtres + bouton « Rechercher » explicite + pagination, partout.",
+                      "Files d'attente (e-mails, sauvegardes manuelles) + planificateur (tâches automatiques).",
+                      "Stockage séparé : disque media (public) et disque secure (privé), local ou S3/R2.",
+                      "Observabilité optionnelle : logs JSON (Loki/Grafana) + capture d'exceptions (Sentry/GlitchTip).",
+                    ].map((c) => (
+                      <li key={c} className="flex gap-2">
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
+                        <span>{c}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </DocSection>
 
