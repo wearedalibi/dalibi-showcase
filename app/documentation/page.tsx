@@ -802,6 +802,24 @@ database/
                   fonctionne aussitôt (menus, routes, cartes). Détails :{" "}
                   <a href={`${GITHUB_URL}/blob/main/docs/administration/roles-permissions.md`} target="_blank" rel="noopener noreferrer">guide rôles & permissions</a>.
                 </p>
+
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">Ce que le contrôle d&apos;accès garantit</h3>
+                  <ul className="space-y-1.5 text-sm text-muted">
+                    {[
+                      "Une permission par verbe : un droit de lecture (view_*) ne permet jamais de créer, modifier ou supprimer.",
+                      "Cloisonnement enseignant : un professeur ne saisit notes et appels que dans les classes où il est affecté.",
+                      "Contrôle d'appartenance : on ne note ni ne pointe qu'un élève réellement inscrit dans la classe visée.",
+                      "Comptes à privilèges : seul un administrateur peut modifier ou supprimer un compte administrateur.",
+                      "Un mot de passe défini par un tiers doit être changé à la première connexion.",
+                    ].map((s) => (
+                      <li key={s} className="flex gap-2">
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </DocSection>
 
               {/* 9. Stockage */}
@@ -874,6 +892,8 @@ database/
                     "Servez toujours en HTTPS ; forcez la redirection HTTP → HTTPS.",
                     "Activez la double authentification (2FA) sur les comptes à privilèges (administrateur, direction).",
                     "Appliquez le moindre privilège : donnez à chaque rôle uniquement les permissions nécessaires.",
+                    "Écritures financières protégées : encaissements et cycles de paie sont validés sous verrou — un double-clic ne peut pas encaisser ni décaisser deux fois.",
+                    "La preuve d'un encaissement est indestructible : une inscription portant des paiements ne peut pas être supprimée.",
                     "Sauvegardez régulièrement et hors-site (règle 3-2-1) ; testez la restauration et l'intégrité (SHA-256).",
                     "Les pièces sensibles (photos, justificatifs) sont déjà sur un disque privé (secure), hors du dossier public.",
                     "Le journal d'audit trace les actions : consultez-le en cas d'incident.",
