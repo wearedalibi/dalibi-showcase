@@ -410,6 +410,13 @@ MATRICULE_COUNTRY_CODE=TG`}
                   </table>
                 </div>
 
+                <Callout tone="info" title="Le choix du seeder est manuel">
+                  Il n&apos;y a <strong>pas de bascule automatique selon l&apos;environnement</strong> : c&apos;est vous
+                  qui choisissez le seeder à lancer (démo en dev, <C>ReferenceDataSeeder</C> en prod). Laravel ajoute
+                  toutefois un garde-fou — en production, <C>db:seed</C> et <C>migrate --seed</C> demandent une
+                  confirmation et refusent de s&apos;exécuter sans <C>--force</C> (utile en déploiement non-interactif).
+                </Callout>
+
                 {/* Dev / démo */}
                 <div className="pt-2">
                   <h3 className="font-semibold text-foreground mb-2">Développement / démo — connexion immédiate</h3>
@@ -441,8 +448,8 @@ secretaire@dalibi.tg   →  Secrétaire
                   </p>
                   <Code
                     shell
-                    code={`php artisan migrate
-php artisan db:seed --class=ReferenceDataSeeder`}
+                    code={`php artisan migrate --force
+php artisan db:seed --class=ReferenceDataSeeder --force`}
                   />
                   <p className="text-sm mt-3 mb-2">
                     Il ne reste plus qu&apos;à créer votre <strong>premier administrateur</strong>. Via Tinker :
