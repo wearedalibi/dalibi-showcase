@@ -442,13 +442,22 @@ MAIL_FROM_NAME="\${APP_NAME}"`}
                         </td>
                         <td className="py-2.5 align-top">Démo / dev.</td>
                       </tr>
-                      <tr>
+                      <tr className="border-b border-border/60">
                         <td className="py-2.5 pr-4 align-top"><C>DatabaseSeeder</C> <span className="text-xs">(défaut de <C>db:seed</C>)</span></td>
                         <td className="py-2.5 pr-4 align-top">
                           ReferenceData + DefaultUsers + modèles de documents + élèves fictifs (inscrits à
                           l&apos;année active).
                         </td>
                         <td className="py-2.5 align-top">Dev / démo — <strong>bloqué en prod</strong>.</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 pr-4 align-top"><C>DemoSeeder</C></td>
+                        <td className="py-2.5 pr-4 align-top">
+                          Une <strong>année scolaire complète</strong> sur toutes les classes (≥ 20 élèves) : notes,
+                          moyennes, bulletins, factures &amp; paiements, présences, emploi du temps, calendrier, paie —
+                          noms et villes <strong>réels (Togo)</strong>.
+                        </td>
+                        <td className="py-2.5 align-top">Démo riche — <strong>bloqué en prod</strong>.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -486,6 +495,37 @@ secretaire@dalibi.tg   →  Secrétaire
                     <strong>automatiquement ignorés</strong> lorsque <C>APP_ENV=production</C> — même avec{" "}
                     <C>db:seed --force</C>. Un <C>db:seed</C> en production n&apos;installe donc que les données de
                     référence.
+                  </Callout>
+                </div>
+
+                {/* Jeu de démonstration complet */}
+                <div className="pt-4">
+                  <h3 className="font-semibold text-foreground mb-2">Données de démonstration complètes</h3>
+                  <p className="text-sm mb-3">
+                    Pour présenter l&apos;application avec une école qui « vit », le <C>DemoSeeder</C> génère une{" "}
+                    <strong>année scolaire entière</strong> sur toutes les classes actives (au moins 20 élèves par
+                    classe) : dossiers d&apos;élèves, programme et affectations des enseignants, évaluations notées et
+                    moyennes par matière, bulletins figés, facturation et paiements, présences, emploi du temps,
+                    calendrier, cycles de paie et dossiers courants (justificatifs, réclamations, primes, documents).
+                    Les noms, prénoms et villes sont <strong>réels</strong> (divisions administratives du Togo).
+                  </p>
+                  <p className="text-sm mb-3">
+                    Il se lance <strong>après</strong> un seed de base (qui pose l&apos;école, l&apos;année, les classes
+                    et les matières) — il ne fait pas partie de <C>DatabaseSeeder</C>, trop lourd pour chaque
+                    installation&nbsp;:
+                  </p>
+                  <Code
+                    shell
+                    code={`# 1. socle : école, année, classes, matières, comptes de démo
+php artisan migrate --seed
+
+# 2. jeu de démonstration complet (une année scolaire vivante)
+php artisan db:seed --class=DemoSeeder`}
+                  />
+                  <Callout tone="info" title="Idempotent et déterministe">
+                    Relançable sans doublon (il complète chaque classe jusqu&apos;à l&apos;effectif cible) et
+                    reproductible d&apos;une machine à l&apos;autre (graine fixe). Comme les autres seeders de
+                    démonstration, il est <strong>ignoré en production</strong>.
                   </Callout>
                 </div>
 
