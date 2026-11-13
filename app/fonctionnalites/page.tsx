@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Archive, ArrowRight, BarChart3, Building2, Calendar, CalendarDays, Check,
   ClipboardList, CloudUpload, DatabaseBackup, FileBadge, Gauge, GraduationCap,
-  LayoutGrid, School, Server, ShieldCheck, UserCheck, Users, Wallet,
+  Languages, LayoutGrid, School, Server, ShieldCheck, UserCheck, Users, Wallet,
 } from "lucide-react";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { PageHero } from "@/components/landing/page-hero";
@@ -187,6 +187,11 @@ const moreFeatures: FeatureCard[] = [
     icon: DatabaseBackup,
     title: "Sauvegardes & restauration",
     points: ["Export JSON et SQL", "Planification et rétention automatiques", "Restauration depuis l'interface"],
+  },
+  {
+    icon: Languages,
+    title: "Interface bilingue FR/EN",
+    points: ["Disponible en français et en anglais", "Bascule de langue dans l'interface", "Écrans, menus et composants traduits"],
   },
   {
     icon: Server,
