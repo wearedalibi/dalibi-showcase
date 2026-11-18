@@ -30,7 +30,7 @@ const nav: DocNavItem[] = [
   { id: "docker", label: "Installation Docker" },
   { id: "configuration", label: "Configuration (.env)" },
   { id: "email", label: "E-mails (SMTP)" },
-  { id: "demarrage", label: "Seeding & démarrage" },
+  { id: "demarrage", label: "Installation web & démarrage" },
   { id: "production", label: "Mise en production" },
   { id: "architecture", label: "Comprendre l'app" },
   { id: "modules", label: "Les modules" },
@@ -216,10 +216,11 @@ export default function DocumentationPage() {
                   <strong>React 19 + TypeScript</strong> reliée par <strong>Inertia.js</strong> (SPA sans API séparée),
                   sur <strong>PostgreSQL</strong>. En auto-hébergement, vos données restent chez vous.
                 </p>
-                <Callout tone="info" title="Version stable : v1.0.0">
+                <Callout tone="info" title="Version stable : v1.1.0">
                   La version stable actuelle. Ce guide décrit la{" "}
-                  <a href={GITHUB_URL + "/releases/tag/v1.0.0"} target="_blank" rel="noopener noreferrer">v1.0.0</a>{" "}
-                  — voir le{" "}
+                  <a href={GITHUB_URL + "/releases/tag/v1.1.0"} target="_blank" rel="noopener noreferrer">v1.1.0</a>{" "}
+                  — nouveauté phare : l&apos;<a href="#demarrage">assistant d&apos;installation web</a> (plus
+                  d&apos;identifiants par défaut). Voir le{" "}
                   <a href={GITHUB_URL + "/blob/main/CHANGELOG.md"} target="_blank" rel="noopener noreferrer">journal des versions</a>.
                 </Callout>
 
@@ -272,18 +273,29 @@ php artisan key:generate`} />
                       <a href="#configuration">Configuration</a>).
                     </p>
                   </Step>
-                  <Step n={3} title="Créer le schéma et les données de base">
+                  <Step n={3} title="Première configuration (recommandé : assistant web)">
+                    <p className="text-sm">
+                      Sur une base vierge, le plus simple est de <strong>lancer le serveur</strong> (étape 4) puis
+                      d&apos;ouvrir <C>/install</C> : l&apos;<a href="#demarrage">assistant d&apos;installation web</a>{" "}
+                      applique le schéma, pose les données de référence, crée l&apos;école et{" "}
+                      <strong>votre administrateur</strong> — sans ligne de commande et{" "}
+                      <strong>sans identifiant par défaut</strong>.
+                    </p>
+                    <p className="text-sm">
+                      Pour un poste de <strong>développement</strong>, vous pouvez à la place seeder directement une
+                      base de démo :
+                    </p>
                     <Code
                       shell
-                      code={`# Développement : schéma + données de référence + comptes de démo
+                      code={`# Développement uniquement : schéma + données de référence + comptes de démo
 php artisan migrate --seed
 # Lien symbolique pour les fichiers publics
 php artisan storage:link`}
                     />
                     <p className="text-sm">
                       <C>--seed</C> exécute le <C>DatabaseSeeder</C> (données de <strong>démonstration</strong>, dont
-                      des comptes prêts à l&apos;emploi). Pour la production, on seede uniquement les données de
-                      référence — voir <a href="#demarrage">Seeding &amp; premier démarrage</a>.
+                      des comptes de test). En production, préférez l&apos;assistant web — voir{" "}
+                      <a href="#demarrage">Installation web &amp; premier démarrage</a>.
                     </p>
                   </Step>
                   <Step n={4} title="Compiler l'interface et lancer le serveur">
@@ -297,7 +309,10 @@ php artisan serve
 npm run build
 php artisan serve`}
                     />
-                    <p className="text-sm">L&apos;application est disponible sur <C>http://localhost:8000</C>.</p>
+                    <p className="text-sm">
+                      L&apos;application est disponible sur <C>http://localhost:8000</C>. Sur une base vierge, elle
+                      redirige vers <C>/install</C> pour la <a href="#demarrage">première configuration</a>.
+                    </p>
                   </Step>
                   <Step n={5} title="Traitements en arrière-plan (files d'attente & planificateur)">
                     <p className="text-sm">
@@ -328,8 +343,11 @@ php artisan schedule:work   # planificateur (tâches automatiques)`}
                   shell
                   code={`cp .env.example .env        # renseigner APP_KEY, DB_*, MAIL_*
 docker compose up -d --build
-docker compose exec app php artisan migrate --seed
-docker compose exec app php artisan storage:link`}
+docker compose exec app php artisan storage:link
+# Puis ouvrez le site : il redirige vers /install (assistant web).
+# — ou, en déploiement non-interactif, seedez en ligne de commande :
+docker compose exec app php artisan migrate --force
+docker compose exec app php artisan db:seed --class=ReferenceDataSeeder --force`}
                 />
                 <Callout tone="info">
                   Le service <strong>scheduler</strong> doit tourner en <strong>un seul exemplaire</strong> (sinon
@@ -403,13 +421,80 @@ MAIL_FROM_NAME="\${APP_NAME}"`}
                 </p>
               </DocSection>
 
-              {/* 6. Seeding & premier démarrage */}
-              <DocSection id="demarrage" eyebrow="Étape 4" title="Seeding & premier démarrage">
+              {/* 6. Installation web & premier démarrage */}
+              <DocSection id="demarrage" eyebrow="Étape 4" title="Installation web & premier démarrage">
                 <p>
-                  Le <strong>seeding</strong> pré-remplit la base. C&apos;est aussi par là que naît le{" "}
-                  <strong>premier utilisateur</strong> : l&apos;inscription publique est désactivée, aucun compte ne peut
-                  s&apos;auto-créer. Quatre points d&apos;entrée existent, du plus minimal au plus complet :
+                  Il y a <strong>deux façons</strong> d&apos;amorcer une instance : l&apos;<strong>assistant
+                  d&apos;installation web</strong> (recommandé, sans ligne de commande) ou le{" "}
+                  <strong>seeding en ligne de commande</strong> (pour l&apos;automatisation et le développement). Dans
+                  tous les cas, l&apos;inscription publique est désactivée : aucun compte ne peut s&apos;auto-créer.
                 </p>
+
+                {/* Assistant web */}
+                <div className="pt-2">
+                  <h3 className="font-semibold text-foreground mb-2">
+                    Assistant d&apos;installation web (recommandé)
+                  </h3>
+                  <p className="text-sm mb-3">
+                    Façon « première configuration » (comme WordPress) : une fois le <C>.env</C> renseigné (base +{" "}
+                    <C>APP_KEY</C>) et le serveur lancé, toute visite redirige vers <C>/install</C>. L&apos;assistant
+                    prend tout en charge, en quatre écrans :
+                  </p>
+                  <div className="space-y-5">
+                    <Step n={1} title="Langue">
+                      Fixe la langue de l&apos;assistant <strong>et</strong> de l&apos;application (FR / EN) ; toute
+                      l&apos;interface bascule aussitôt.
+                    </Step>
+                    <Step n={2} title="Administrateur">
+                      Votre compte principal (prénom, nom, e-mail, mot de passe). Le mot de passe applique la{" "}
+                      <strong>politique de l&apos;app</strong> (min. 12 caractères, casse mixte, chiffres, symboles, et
+                      vérification contre les fuites connues en production). <strong>C&apos;est vous qui le
+                      choisissez</strong> — il n&apos;y a aucun mot de passe par défaut.
+                    </Step>
+                    <Step n={3} title="Sécurité">
+                      HTTPS forcé (hors local), <C>APP_DEBUG</C> coupé en production, journalisation des erreurs. La
+                      2FA n&apos;est pas imposée : chacun l&apos;active dans ses réglages.
+                    </Step>
+                    <Step n={4} title="École">
+                      Identité de l&apos;établissement par sections : <strong>Identité</strong> (nom, code, monnaie,
+                      devise/slogan), <strong>Direction &amp; contact</strong>, <strong>Localisation</strong> (pays,
+                      région, ville…), <strong>Organisation pédagogique</strong> (niveaux — un ou plusieurs cycles —,
+                      année académique, périodes).
+                    </Step>
+                  </div>
+                  <div className="h-4" />
+                  <p className="text-sm mb-3">
+                    À la validation, l&apos;assistant exécute <strong>réellement</strong> l&apos;installation :{" "}
+                    <C>migrate</C>, données de référence de production (<C>ReferenceDataSeeder</C>), création de
+                    l&apos;école, de l&apos;<strong>administrateur</strong> (défini comme <strong>propriétaire</strong>{" "}
+                    de l&apos;école) et de l&apos;année scolaire active, réglages de sécurité, puis <strong>pose d&apos;un
+                    verrou</strong>. Chaque étape est <strong>idempotente</strong> : une reprise après interruption ne
+                    crée pas de doublon.
+                  </p>
+                  <Callout tone="info" title="Plus d'identifiants par défaut">
+                    Contrairement à un seeding de démo, l&apos;assistant <strong>ne crée aucun compte générique</strong>{" "}
+                    (fini le <C>admin@dalibi.tg</C> / <C>password</C>). Le seul compte créé est le vôtre, avec le mot de
+                    passe que vous définissez. Une fois installée, l&apos;application <strong>se verrouille</strong> :{" "}
+                    <C>/install</C> redirige alors vers la connexion. La <strong>source de vérité</strong> de
+                    l&apos;état « installé » est la base (présence d&apos;utilisateurs), pas un simple fichier.
+                  </Callout>
+                  <p className="text-sm mt-3">
+                    Détails complets :{" "}
+                    <a href={`${GITHUB_URL}/blob/main/documentations/prise-en-main/installation-web.md`} target="_blank" rel="noopener noreferrer">guide de l&apos;assistant d&apos;installation web</a>.
+                  </p>
+                </div>
+
+                {/* Alternative CLI */}
+                <div className="pt-6">
+                  <h3 className="font-semibold text-foreground mb-2">
+                    Alternative : seeding en ligne de commande
+                  </h3>
+                  <p className="text-sm mb-3">
+                    Pour l&apos;automatisation (CI, Docker, provisioning) ou le développement, vous pouvez amorcer la
+                    base sans l&apos;assistant. Plusieurs points d&apos;entrée existent, du plus minimal au plus
+                    complet :
+                  </p>
+                </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm border-collapse">
@@ -450,15 +535,6 @@ MAIL_FROM_NAME="\${APP_NAME}"`}
                         </td>
                         <td className="py-2.5 align-top">Dev / démo — <strong>bloqué en prod</strong>.</td>
                       </tr>
-                      <tr>
-                        <td className="py-2.5 pr-4 align-top"><C>DemoSeeder</C></td>
-                        <td className="py-2.5 pr-4 align-top">
-                          Une <strong>année scolaire complète</strong> sur toutes les classes (≥ 20 élèves) : notes,
-                          moyennes, bulletins, factures &amp; paiements, présences, emploi du temps, calendrier, paie —
-                          noms et villes <strong>réels (Togo)</strong>.
-                        </td>
-                        <td className="py-2.5 align-top">Démo riche — <strong>bloqué en prod</strong>.</td>
-                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -498,43 +574,34 @@ secretaire@dalibi.tg   →  Secrétaire
                   </Callout>
                 </div>
 
-                {/* Jeu de démonstration complet */}
+                {/* Données de démonstration */}
                 <div className="pt-4">
-                  <h3 className="font-semibold text-foreground mb-2">Données de démonstration complètes</h3>
+                  <h3 className="font-semibold text-foreground mb-2">Données de démonstration (élèves fictifs)</h3>
                   <p className="text-sm mb-3">
-                    Pour présenter l&apos;application avec une école qui « vit », le <C>DemoSeeder</C> génère une{" "}
-                    <strong>année scolaire entière</strong> sur toutes les classes actives (au moins 20 élèves par
-                    classe) : dossiers d&apos;élèves, programme et affectations des enseignants, évaluations notées et
-                    moyennes par matière, bulletins figés, facturation et paiements, présences, emploi du temps,
-                    calendrier, cycles de paie et dossiers courants (justificatifs, réclamations, primes, documents).
-                    Les noms, prénoms et villes sont <strong>réels</strong> (divisions administratives du Togo).
+                    Le <C>DatabaseSeeder</C> (lancé par <C>migrate --seed</C>) inclut déjà des <strong>élèves
+                    fictifs</strong> inscrits à l&apos;année active, via le <C>StudentTestSeeder</C> — de quoi parcourir
+                    les listes, bulletins et écrans financiers sans saisie manuelle. Comme les comptes de démo, ces
+                    données sont <strong>ignorées en production</strong>.
                   </p>
-                  <p className="text-sm mb-3">
-                    Il se lance <strong>après</strong> un seed de base (qui pose l&apos;école, l&apos;année, les classes
-                    et les matières) — il ne fait pas partie de <C>DatabaseSeeder</C>, trop lourd pour chaque
-                    installation&nbsp;:
-                  </p>
-                  <Code
-                    shell
-                    code={`# 1. socle : école, année, classes, matières, comptes de démo
-php artisan migrate --seed
-
-# 2. jeu de démonstration complet (une année scolaire vivante)
-php artisan db:seed --class=DemoSeeder`}
-                  />
-                  <Callout tone="info" title="Idempotent et déterministe">
-                    Relançable sans doublon (il complète chaque classe jusqu&apos;à l&apos;effectif cible) et
-                    reproductible d&apos;une machine à l&apos;autre (graine fixe). Comme les autres seeders de
-                    démonstration, il est <strong>ignoré en production</strong>.
+                  <Callout tone="info" title="Déterministe et prod-safe">
+                    Le jeu de démo est reproductible (graine fixe) et protégé : <C>StudentTestSeeder</C> et{" "}
+                    <C>DefaultUsersSeeder</C> ne s&apos;exécutent jamais lorsque <C>APP_ENV=production</C>, même avec{" "}
+                    <C>--force</C>.
                   </Callout>
                 </div>
 
                 {/* Production */}
                 <div className="pt-4">
-                  <h3 className="font-semibold text-foreground mb-2">Production — seeding prod-safe + premier admin</h3>
+                  <h3 className="font-semibold text-foreground mb-2">Production — premier démarrage</h3>
                   <p className="text-sm mb-3">
-                    En production, on migre puis on ne seede que les <strong>données de référence</strong> (aucun compte
-                    de démo, aucun élève fictif) :
+                    En production, la voie <strong>recommandée</strong> est l&apos;<a href="#demarrage">assistant
+                    d&apos;installation web</a> ci-dessus : il migre, seede uniquement les données de référence, et crée{" "}
+                    <strong>votre</strong> administrateur — aucun compte de démo, aucun identifiant par défaut.
+                  </p>
+                  <p className="text-sm mb-3">
+                    Pour un déploiement <strong>automatisé</strong> (CI, Docker) où l&apos;assistant n&apos;est pas
+                    pratique, faites l&apos;équivalent en ligne de commande : migrer, seeder les{" "}
+                    <strong>données de référence</strong>, puis créer le premier administrateur.
                   </p>
                   <Code
                     shell
@@ -542,7 +609,8 @@ php artisan db:seed --class=DemoSeeder`}
 php artisan db:seed --class=ReferenceDataSeeder --force`}
                   />
                   <p className="text-sm mt-3 mb-2">
-                    Il ne reste plus qu&apos;à créer votre <strong>premier administrateur</strong>. Via Tinker :
+                    Création du <strong>premier administrateur</strong> via Tinker (choisissez un mot de passe fort — il
+                    n&apos;en existe aucun par défaut) :
                   </p>
                   <Code
                     title="php artisan tinker"
@@ -555,11 +623,6 @@ php artisan db:seed --class=ReferenceDataSeeder --force`}
 ]);
 $u->assignRole(App\\Constants\\Roles::ADMINISTRATOR); // le matricule est généré automatiquement`}
                   />
-                  <p className="text-sm mt-3">
-                    Alternative rapide : lancer <C>db:seed --class=DefaultUsersSeeder</C> puis{" "}
-                    <strong>changer immédiatement le mot de passe</strong> du compte <C>admin@dalibi.tg</C> et supprimer
-                    les comptes de démo superflus.
-                  </p>
                 </div>
 
                 {/* Onboarding */}
@@ -934,7 +997,8 @@ database/
               <DocSection id="securite" eyebrow="Exploiter" title="Sécurité & bonnes pratiques">
                 <ul className="space-y-1.5 text-sm text-muted">
                   {[
-                    "Les comptes de démonstration sont bloqués en production et imposent un changement de mot de passe à la première connexion — ne contournez pas ce garde-fou.",
+                    "En production, installez via l'assistant web : il crée votre seul administrateur, avec le mot de passe que vous choisissez — aucun identifiant par défaut à changer ou à oublier.",
+                    "Les comptes de démonstration (dev) sont bloqués en production et imposent un changement de mot de passe à la première connexion — ne contournez pas ce garde-fou.",
                     "APP_DEBUG=false en production, et ne commitez jamais l'APP_KEY ni le .env.",
                     "Servez toujours en HTTPS ; forcez la redirection HTTP → HTTPS.",
                     "Activez la double authentification (2FA) sur les comptes à privilèges (administrateur, direction).",

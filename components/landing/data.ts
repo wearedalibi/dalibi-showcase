@@ -220,7 +220,7 @@ export const faqs: FaqItem[] = [
   {
     id: "faq-prerequis",
     q: "Quels sont les prérequis techniques pour l'installer ?",
-    a: "Dalibi repose sur Laravel 12 (PHP 8.3+), React 19 + Inertia.js et PostgreSQL 12+. Il faut Composer et Node.js/npm pour l'installation. Un déploiement Docker est également disponible pour simplifier la mise en production.",
+    a: "Dalibi repose sur Laravel 12 (PHP 8.3+), React 19 + Inertia.js et PostgreSQL 12+. Il faut Composer et Node.js/npm pour l'installation. La première configuration se fait ensuite via un assistant web (façon WordPress) : langue, administrateur, sécurité et école, sans ligne de commande ni identifiant par défaut. Un déploiement Docker est également disponible pour simplifier la mise en production.",
   },
   {
     id: "faq-contribution",
