@@ -90,7 +90,7 @@ export function LandingFooter() {
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-sm text-muted">&copy; {new Date().getFullYear()} Dalibi. Open source sous licence GPL v3.</p>
             <a
-              href="https://github.com/wearedalibi/dalibi/blob/main/CHANGELOG.md"
+              href="https://github.com/wearedalibi/dalibi/releases/tag/v1.1.0"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-full border border-border bg-card px-2.5 py-0.5 text-xs font-medium text-muted hover:text-primary transition"

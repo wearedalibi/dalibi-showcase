@@ -218,7 +218,7 @@ export default function DocumentationPage() {
                 </p>
                 <Callout tone="info" title="Version stable : v1.1.0">
                   La version stable actuelle. Ce guide décrit la{" "}
-                  <a href={GITHUB_URL + "/blob/main/CHANGELOG.md"} target="_blank" rel="noopener noreferrer">v1.1.0</a>{" "}
+                  <a href={GITHUB_URL + "/releases/tag/v1.1.0"} target="_blank" rel="noopener noreferrer">v1.1.0</a>{" "}
                   — nouveauté phare : l&apos;<a href="#demarrage">assistant d&apos;installation web</a> (plus
                   d&apos;identifiants par défaut). Voir le{" "}
                   <a href={GITHUB_URL + "/blob/main/CHANGELOG.md"} target="_blank" rel="noopener noreferrer">journal des versions</a>.
